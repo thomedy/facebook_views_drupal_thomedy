@@ -3,7 +3,7 @@
 FACEBOOK VIEWS 
 __________________
 
-created by Thom Simmons: therstonsplace@thomedy.com
+created by Thom Simmons: therstonsplace@yahoo.com
 
 
 This module takes an rss feed from www.fbrss.com where you get your facebook feed. After processing the feed it first represents the content in a block and then sends the content to the db.
