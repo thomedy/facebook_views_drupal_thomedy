@@ -1,1 +1,30 @@
-testing;;laksdfj;alsdkfj;ajkd
+
+
+FACEBOOK VIEWS 
+__________________
+
+created by Thom Simmons: therstonsplace@thomedy.com
+
+
+This module takes an rss feed from www.fbrss.com where you get your facebook feed. After processing the feed it first represents the content in a block and then sends the content to the db.
+
+__________________________________________________________________________
+
+You can get your facebook rss from www.fbrss.com. Or at least until they change it again
+
+__________________________________________________________________________
+
+Once you have your rss follow this complex process to configure this advanced module.
+
+1: go to the path admin/settings/set_facebook_rss
+
+2: copy past your rss.
+
+3: hit submit
+
+(step 3 probably wasn't needed but it seemed so boring)
+
+
+__________________________________________________________________________
+thus concludes this read me... 
+
