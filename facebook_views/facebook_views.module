@@ -1,0 +1,220 @@
+<?php
+
+/*
+ * @file
+ * This module is used as a substition for activity_stream facebook it
+ * recieves the rss from  a facebook page and then transforms it to a 
+ * block and then sends the content to the database to make it available
+ * to others
+ */
+
+
+
+/*
+ *  Implements hook_menu()
+ *
+ */
+
+    function facebook_views_menu() {
+      $items = array();
+      $items['admin/settings/set_facebook_rss'] = array(
+         'title' => t('Facebook Views Configuration Page'),
+         'description' => t('A place to enter your rss from facebook'),
+         'page callback' => 'set_rss',
+         'type' => MENU_NORMAL_ITEM,
+         'access arguments' => array('make feed'),
+      );
+      return $items;  
+    }
+
+/*
+ * 
+ *  implements hook_perm()
+ *
+ */
+
+  function facebook_views_perm() {
+    return array('make feed');
+  }
+
+    function set_rss() {
+        return drupal_get_form('facebook_views_form');
+    }
+
+/*
+ *  Implements hook_form()
+ *
+ */
+
+    function facebook_views_form($form_state) {
+        $form = array();
+        $form['rss_input'] = array(
+           '#title'       =>t('facebook views input'),
+           '#description' => t('input your facebook rss here'),
+           '#type'        => 'textfield',
+           '#size'        => '60',
+        );
+
+        $form['submit'] = array(
+          '#type' => 'submit',
+          '#value'=> t('submit'),
+        );
+        return $form;
+ }
+
+/*
+ *  Implements hook_form_submit()
+ *
+ */
+
+   function facebook_views_form_submit($form, &$form_state) {
+
+           global $user;
+
+           $userFeed = $form_state['values']['rss_input'];
+ 
+
+           $query = 'insert into {facebook_views_rss} (rss_feed, time, uid, uName) values (\'%s\', %d, %d, \'%s\')';  
+           db_query($query, $userFeed, time(), $user->uid, $user->name);
+
+           drupal_set_message("your rss feed has been saved!");
+   }
+
+/*
+ *  Implements hook_form_validate()
+ *
+ */
+
+   function facebook_views_form_validate($form, &$form_state) {
+            global $user;
+            $userFeed = $form_state['values']['rss_input'];
+            $validSentence = explode(".com", $userFeed);
+
+             if($validSentence[0] != "http://fbrss" ) {    
+                  form_set_error('not a valid rss from facebook');
+                  drupal_set_message('enter a valid sentence please');
+             }
+  
+   }
+
+/*
+ *  Implements hook_block()
+ *
+ */
+
+    function facebook_views_block($op = 'list', $delta = 0, $edit = array()) {
+     global $user;
+
+      switch ($op) {
+
+        case 'list':
+          $blocks[0] = array(
+            'info' => t('facebook view block'),        
+          );
+          return $blocks;
+        case 'view':
+          switch ($delta) {
+
+            case 0:
+              $block['subject'] = "facebook feed";
+
+              $block['content'] = new_facebook_feed();
+              break;
+
+          }    
+
+          return $block;
+
+		
+
+        }
+
+		
+    }
+		
+
+
+function new_facebook_feed() {
+   drupal_add_css(drupal_get_path('module', 'facebook_views')."/facebook_views.css");   
+
+  $newQuery = 'select rss_feed, uName from {facebook_views_rss} order by time Desc';
+  $retrieveQuery = db_query_range($newQuery, 0, 1);
+  
+    $rssFeed;
+    $uName;
+ 
+   while ($feed = db_fetch_array($retrieveQuery)) {
+      $rssFeed = $feed['rss_feed'];  
+      $uName =  $feed['uName'];   
+   }         
+
+  if(isset($rssFeed)) {
+
+     $time;
+     $doc = new DOMDocument();
+     $doc->load($rssFeed);
+     $dataset = $doc->getElementsByTagName('item');
+     $counter = 0;
+     $output;
+ 
+     foreach($dataset as $set) {
+      $titleMiddleMan = $set->getElementsByTagName('title');
+      $title = $titleMiddleMan->item(0)->nodeValue;
+
+  $linkMiddleMan = $set->getElementsByTagName('link');
+  $link = $linkMiddleMan->item(0)->nodeValue;
+  $userName = $uName;
+  $fbFilteredContent = filter($title);
+  
+
+  $pubDateMiddleMan = $set->getElementsByTagName('pubDate');
+  $pubDate = $pubDateMiddleMan->item(0)->nodeValue;
+   
+  $time = strtotime($pubDate);
+   
+  
+     $queryContent = 'insert into {facebook_rss_content} (pubDate, filtContent) values (%d, \'%s\')';  
+           db_query($queryContent, $pubDate, $fbFilteredContent);
+ 
+  global $output;
+
+   $counter++; 
+   if($counter>3){
+   break;
+   
+   }
+
+  $output .= "<div class = 'fbCustomBlock'>".
+
+                 //this field is hidden//
+                 "<div class='fbHiddenTimeStamp'>" . $time . "</div>" .
+
+                 "<img class = 'fbIconImage' src='sites/all/modules/facebook_views/facebook.png' height='16' width='16'>" .
+                 "<div id=fullFbContentHolder>" .
+                    "<div class='dave'>".$userName."</div>".
+                    "<div class='datestamp'>" . date('M d Y', strtotime($pubDate)) . "</div>" .
+                    "<span class=fbLinkHolder>" .
+                       "<a class='fbCustomLink' href = '" . $link . "'>" .
+                          $fbFilteredContent . "</a>".
+                    "</span>" .
+                  "</div>" .
+                "</div>";
+   }
+
+
+   return $output;
+   }
+}
+
+
+function filter($filterVariable) {
+   if (strlen($filterVariable) >= 100){
+      $fbContentFiltered = substr($filterVariable, 0, 100) . "... ";
+   }
+   else  {
+       $fbContentFiltered = $filterVariable;   
+   }
+   return $fbContentFiltered;
+
+}
+

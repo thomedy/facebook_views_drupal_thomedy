@@ -1,0 +1,86 @@
+<?php
+
+   /*
+    * implements hook_install
+    *
+    */
+   
+   function facebook_views_install() {
+      drupal_install_schema('facebook_views');
+   }   
+
+
+   /*
+    * implements hook_uninstall
+    *
+    */
+
+   function facebook_views_uninstall() {
+      drupal_uninstall_schema('facebook_views'); 
+   }
+
+
+   /*
+    * implements hook_schema
+    *
+    */
+
+   function facebook_views_schema() {
+     $schema['facebook_views_rss'] = array(
+      'description' => t('the base table for the rss feed'),
+      'fields' => array(
+         'rss_feed' => array(
+            'description' => t('this column holds the rss feed'),
+            'type' => 'varchar',
+            'length' => 100,
+            'not null' => FALSE,
+            'default' => ''
+          ),
+          'time' => array (
+            'description' => t('a table to hold the time of insert'),
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+            'default'  => 0,
+          ),
+          'uid' => array(
+             'description' => t('a table to hold user id'),
+             'type' => 'int',
+             'unsigned' => TRUE,
+             'not null' => TRUE,
+             'default' => 0, 
+          ),
+          'uName' => array(
+             'description' => t('a table to hold user name'),
+             'type' => 'varchar',
+             'length' => 50,
+             'not null' => FALSE,
+             'default' => '',
+             ),
+           ),
+        'primary keys' => array('rss_feed'),   
+    );
+
+    $schema['facebook_rss_content'] = array(
+        'description' => t('holds the content for your feed'),
+        'fields' => array(
+           'pubDate' => array (
+             'description' => t('this column holds the feed date'),
+             'type' => 'int',
+             'unsigned' => TRUE,
+             'not null' => TRUE,
+             'default'  => 0,
+          ),
+          'filtContent' => array (
+              'description' => t('this column holds the feed date'),
+               'type' => 'varchar',
+               'length' => 255,
+               'not null' => false,
+           ),
+        ),
+       'primary keys' => array('pubDate'),
+    );
+
+   return $schema;
+
+   }

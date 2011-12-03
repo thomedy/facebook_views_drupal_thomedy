@@ -1,0 +1,94 @@
+
+<?php
+
+    function facebook_views_block($op = 'list', $delta = 0, $edit = array()) {
+     global $user;
+
+      switch ($op) {
+
+        case 'list':
+          $blocks[0] = array(
+            'info' => t('facebook view block'),        
+          );
+          return $blocks;
+        case 'view':
+          switch ($delta) {
+
+            case 0:
+              $block['subject'] = "facebook feed";
+
+              $block['content'] = new_facebook_feed();
+              break;
+
+          }    
+
+          return $block;
+
+		
+
+        }
+
+		
+    }
+		
+
+
+function new_facebook_feed() {
+   drupal_add_css(drupal_get_path('module', 'facebook_views')."/facebook_views.css");   
+
+    $query = db_query("SELECT activitystream.link as 'fblink', node.uid as 'user id', users.name as 'name', node.created as 'created', node.title as 'content' FROM {node} join {activitystream} on node.nid = activitystream.nid join {users} on node.uid = users.uid order by node.created desc limit 0, 4");
+  
+
+  while($results = db_fetch_array($query)) 
+  {
+   $created = $results['created'];
+   $dateCreated = date('M t Y',$created);
+   $userName = $results['name'];
+   $USERid = $results['user id'];
+   $link =  $results['fblink'];
+   $fbContent = $results['content'];
+   $fbFilteredContent = filter($fbContent);
+   $fbIcon = 'facebook.png';
+   $output .= "<div class = 'fbCustomBlock'>".
+                 
+                 //this field is hidden//
+                 "<div class='fbHiddenTimeStamp'>" . $created . "</div>" .
+                 
+                 "<img class = 'fbIconImage' src='sites/all/modules/facebook_views/facebook.png' height='16' width='16'>" .
+                 "<div id=fullFbContentHolder>" .
+                    "<div class='dave'>".$userName."</div>". 
+                    "<div class='datestamp'>" . $dateCreated . "</div>" .
+                    "<span class=fbLinkHolder>" .
+                       "<a class='fbCustomLink' href = '" . $link . "'>" . 
+                          $fbFilteredContent . "</a>".
+                    "</span>" .
+                  "</div>" .
+                "</div>";
+   }
+   return $output;
+}
+
+function filter($filterVariable) {
+   if (strlen($filterVariable) >= 100){
+      $fbContentFiltered = substr($filterVariable, 0, 100) . "... ";
+   }
+   else  {
+       $fbContentFiltered = $filterVariable;   
+   }
+   return $fbContentFiltered;
+
+}
+
+function facebook_views_cron() {
+   global $user;
+    $last_run = variable_get('mymodule_cron_last_run', REQUEST_TIME);
+
+  if ($last_run <= (now() - 15)) {//180 seconds is three minutes. 
+      print_r($user);  
+    variable_set('mymodule_cron_last_run', REQUEST_TIME);
+  }
+
+  
+
+}
+
