@@ -90,7 +90,7 @@
             $userFeed       = $form_state[ 'values' ][ 'rss_input' ];
             $validSentence  = explode( ".com", $userFeed );
 
-             if( $validSentence[0] != "http://fbrss" ) {    
+             if ( $validSentence[0] != "http://fbrss" ) {    
                   form_set_error( 'not a valid rss from facebook' );
                   drupal_set_message( 'enter a valid sentence please' );
              }
@@ -106,11 +106,12 @@
      global $user;
 
       switch ($op) {
-
         case 'list':
+
           $blocks[ 0 ] = array(
             'info'     => t( 'facebook view block' ),        
           );
+
           return $blocks;
         case 'view':
           switch ( $delta ) {
@@ -120,17 +121,10 @@
 
               $block[ 'content' ] = new_facebook_feed();
               break;
-
           }    
-
           return $block;
-
-		
-
-        }
-
-		
-    }
+        }		
+      }
 		
 
 
@@ -148,7 +142,7 @@ function new_facebook_feed() {
       $uName   =  $feed[ 'uName' ];   
    }         
 
-  if( isset( $rssFeed ) ) {
+  if ( isset( $rssFeed ) ) {
 
      $time;
      $doc     = new DOMDocument();
@@ -157,7 +151,7 @@ function new_facebook_feed() {
      $counter = 0;
      $output;
  
-     foreach( $dataset as $set ) {
+     foreach ( $dataset as $set ) {
       $titleMiddleMan    = $set->getElementsByTagName( 'title' );
       $title             = $titleMiddleMan->item( 0 )->nodeValue;
 
@@ -182,25 +176,25 @@ function new_facebook_feed() {
 
    $counter++;
  
-   if( $counter > 3 ){
+   if ( $counter > 3 ) {
       break;
    }
 
   $_output .= "<div class = 'fbCustomBlock'>".
 
-           //this field is hidden//
-           "<div class='fbHiddenTimeStamp'>" . $time . "</div>" .
-           //rest not hidden//
-           "<img class = 'fbIconImage' src='sites/all/modules/facebook_views/facebook.png' height='16' width='16'>" .
-               "<div id=fullFbContentHolder>" .
-                  "<div class='dave'>" . $userName . "</div>".
-                      "<div class='datestamp'>" . date('M d Y', strtotime($pubDate)) . "</div>" .
-                      "<span class=fbLinkHolder>" .
-                      "<a class='fbCustomLink' href = '" . $link . "'>" .
-                       $fbFilteredContent . "</a>".
-                      "</span>" .
-                  "</div>" .
-             "</div>";
+    //this field is hidden//
+    "<div class='fbHiddenTimeStamp'>" . $time . "</div>" .
+      //rest not hidden//
+      "<img class = 'fbIconImage' src='sites/all/modules/facebook_views/facebook.png' height='16' width='16'>" .
+        "<div id=fullFbContentHolder>" .
+          "<div class='dave'>" . $userName . "</div>".
+             "<div class='datestamp'>" . date('M d Y', strtotime($pubDate)) . "</div>" .
+                "<span class=fbLinkHolder>" .
+                  "<a class='fbCustomLink' href = '" . $link . "'>" .
+                    $fbFilteredContent . "</a>".
+                "</span>" .
+              "</div>" .
+           "</div>";
    }
 
 
@@ -210,7 +204,7 @@ function new_facebook_feed() {
 
 
 function filter( $filterVariable ) {
-   if ( strlen( $filterVariable ) >= 100){
+   if ( strlen( $filterVariable ) >= 100) {
       $fbContentFiltered = substr( $filterVariable, 0, 100 ) . "... ";
    }
    else  {
